@@ -13,7 +13,7 @@ bevelRadius = 5;
 displayDimsRaw = [160, 80, 14.6];
 
 // Extra wiggle room around the display.
-displayWiggleRoom = [.5, .5, 0];
+displayWiggleRoom = [.5, .5, 0]; // .1
 
 // Display module layout.
 displayLayout=[2,1];
@@ -127,10 +127,13 @@ controllerScrewPositions = [
 controllerScrewHoleRadius = 1.5;
 
 /* [Multi-Part Printing] */
-// If set, cut the model in half to be printed in two parts.
-sliceInHalf = false;
+// If > 0, slice the left side of the model for multi-part printing.
+sliceLeft = 0; // .01
 
-// If sliceInHalf is set, how much the two halves should overlap.
+// If < 1, slice the right side of the model for multi-part printing.
+sliceRight = 1; // .01
+
+// How much the two parts should overlap if slicing is enabled.
 topHalfOverhang = 50;
 
 /* [Stand] */
@@ -315,15 +318,39 @@ module front() {
         
         
         
-        if(sliceInHalf) {
+        if(sliceLeft > 0) {
             overhangHull1 = [
-                .5*frontDims.x + .5*topHalfOverhang,
+                (1-sliceLeft)*frontDims.x - .5*topHalfOverhang,
                 .5*frontDims.y,
                 frontDims.z
             ];
             
             overhangHull2 = [
-                .5*frontDims.x - .5*topHalfOverhang,
+                (1-sliceLeft)*frontDims.x + .5*topHalfOverhang,
+                .5*frontDims.y,
+                frontDims.z
+            ];
+            
+            translate([sliceLeft*frontDims.x - .5*topHalfOverhang, 0, 0])
+            union() {
+                translate([topHalfOverhang,0, 0])
+                cube(overhangHull1);
+                
+                translate([0,.5*frontDims.y, 0])
+                cube(overhangHull2);
+            }
+        }
+        
+        
+        if(sliceRight < 1) {
+            overhangHull1 = [
+                sliceRight*frontDims.x + .5*topHalfOverhang,
+                .5*frontDims.y,
+                frontDims.z
+            ];
+            
+            overhangHull2 = [
+                sliceRight*frontDims.x - .5*topHalfOverhang,
                 .5*frontDims.y,
                 frontDims.z
             ];
@@ -551,9 +578,15 @@ module back() {
             
             cable_passthroughs(cablePassthroughPos, backDims.z, true);
         }
+        
+        if(sliceLeft > 0) {
+            sliceDims = [(1-sliceLeft)*backDims.x, backDims.y, backDims.z];
+            translate([(sliceLeft)*backDims.x, 0, 0])
+            cube(sliceDims);
+        }
             
-        if(sliceInHalf) {
-            sliceDims = [.5*backDims.x, backDims.y, backDims.z];
+        if(sliceRight < 1) {
+            sliceDims = [sliceRight*backDims.x, backDims.y, backDims.z];
             cube(sliceDims);
         }
     }
