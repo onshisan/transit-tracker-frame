@@ -36,10 +36,10 @@ cablePassthroughWidth = 30;
 
 /* [Hangers] */
 // Whether teardrop hangers should be added for hanging the display on a wall.
-addHangersTop = false;
+addHangersTop = true;
 
 // Adds hangers for hanging "upside down." Also useful for multi-part printing.
-addHangersBottom = false;
+addHangersBottom = true;
 
 // Radius for the top of each hanger.
 hangerRadiusTop = 3;
